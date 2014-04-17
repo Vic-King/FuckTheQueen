@@ -5,23 +5,19 @@ using System.Collections;
 ///  Class "MenuPlayer" displays the main menu of the player in the first person.
 /// </summary>
 public class CharacterMenu : MonoBehaviour {
+
 	public GUISkin skin;
-	
 	public Material mat;
-
-	private float savedTimeScale;
-	
-	private bool showfps;
-
 	public Color lowFPSColor = Color.red;
 	public Color highFPSColor = Color.green;
-	
 	public int lowFPS = 30;
 	public int highFPS = 50;
-	
-	private bool start = true;
-
 	public Color statColor = Color.yellow;
+
+	private float sliderValue = 2.0F;
+	private float savedTimeScale;
+	private bool showfps;
+	private bool start = true;
 
 	public string[] credits= 
 	{
@@ -107,9 +103,16 @@ public class CharacterMenu : MonoBehaviour {
 
 	void ShowSettingPart() {
 		BeginPage(300,300);
-		string stringToEdit = "";
-		stringToEdit = GUILayout.TextField(stringToEdit, 25);
-		Debug.Log (stringToEdit);
+		GUILayout.BeginArea(new Rect(0, 0, 300, 60));
+		GUILayout.Box("Number of Players : " + Mathf.Round(sliderValue));
+		sliderValue = GUILayout.HorizontalSlider(sliderValue, 0.0F, 10);
+
+		if (GUILayout.Button ("Ok")) {
+			UnPauseGame();
+			// On récupère le script PlayerManager et on instancie les jetons
+		}
+		GUILayout.EndArea();
+
 		EndPage();
 	}
 
@@ -152,6 +155,7 @@ public class CharacterMenu : MonoBehaviour {
 		BeginPage(300,300);
 		GUILayout.Label ("The Drunkard : ");
 		GUILayout.Label ("The Donor Spanking : ");
+		GUILayout.Label ("Mr Freeze : ");
 		GUILayout.Label ("The Most Honorable : ");
 		GUILayout.Label ("The Less Honorable : ");
 		EndPage();
