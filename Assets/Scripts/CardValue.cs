@@ -4,14 +4,18 @@ using System.Collections;
 public class CardValue : MonoBehaviour {
 
 	public string spriteName;
+	public int value;
 
-	private Vector3 mousePosition;
 	private Vector3 cardPositionInit;
+	private Vector3 distanceWithCard;
 	private bool isReturned = false;
+	private Vector3 mousePosition;
 
 	void OnMouseDown() {
 		CardManager.depth -= 0.0001f;
 		cardPositionInit = transform.position;
+		mousePosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+		distanceWithCard = cardPositionInit - mousePosition;
 	}
 
 	void OnMouseUp() {
@@ -20,13 +24,16 @@ public class CardValue : MonoBehaviour {
 			if (!isReturned) {
 				isReturned = true;
 				this.animation.Play("animReturnCard");
+				CardManager.LaunchRules(value);
+				GameObject.Find ("PlayerManager").GetComponent<PlayerManager>().ActiveNextPlayer();
 			}
 		}
 	}
 
 	void OnMouseDrag ()
 	{
-		transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+		mousePosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+		transform.position = mousePosition + distanceWithCard;
 		this.transform.position = new Vector3 (transform.position.x, transform.position.y, CardManager.depth);
 	}
 
