@@ -5,7 +5,9 @@ public class CardManager : MonoBehaviour {
 
 	public GameObject card;
 	public static float depth = 0;
+	public int currentCard;
 
+	private PlayerManager playerManager;
 	private int nbCards = 52;
 	private string[] cards = {"c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "cj", "cq", "ck", 
 								"d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "dj", "dq", "dk", 
@@ -16,9 +18,10 @@ public class CardManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		playerManager = GameObject.Find ("PlayerManager").GetComponent<PlayerManager>();
 		float x = 0, y = 0, angle;
 		Vector3 translation, rotation;
-
+		
 		for (int n = 0; n < nbCards; n++) {
 			x = Random.Range(-5.0f, 5.0f);
 			y = Random.Range(-1.0f, 1.0f);
@@ -33,24 +36,25 @@ public class CardManager : MonoBehaviour {
 		}
 	}
 	
-	public static int LaunchRules (int n) {
-		int nbSips = 0;
+	public void LaunchRules (int n) {
+		playerManager.sipsToDistributed = 0;
+		currentCard = n;
 
 		switch (n) {
 		case 1:
 			Debug.Log ("1 gorgée, un peu d'honneur ?");
-			nbSips = 1;
+			playerManager.sipsToDistributed = 1;
 			break;
 		case 7:
 			Debug.Log ("Thème");
-			nbSips = 1;
+			playerManager.sipsToDistributed = 1;
 			break;
 		case 8:
 			Debug.Log("La règle");
 			break;
 		case 9:
 			Debug.Log("La phrase");
-			nbSips = 1;
+			playerManager.sipsToDistributed = 1;
 			break;
 		case 10:
 			Debug.Log("Le doigt");
@@ -63,14 +67,14 @@ public class CardManager : MonoBehaviour {
 			break;
 		case 13:
 			Debug.Log("Jeu du doigt");
-			nbSips = 1;
+			playerManager.sipsToDistributed = 1;
 			break;
 		default:
 			Debug.Log(n + " gorgées à distribuer !");
-			nbSips = n;
+			playerManager.sipsToDistributed = n;
 			break;
 		}
 
-		return nbSips;
+		playerManager.TestChangePlayer ();
 	}
 }

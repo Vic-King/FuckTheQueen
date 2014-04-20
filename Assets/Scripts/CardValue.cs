@@ -10,6 +10,13 @@ public class CardValue : MonoBehaviour {
 	private Vector3 distanceWithCard;
 	private bool isReturned = false;
 	private Vector3 mousePosition;
+	private PlayerManager playerManager;	
+	private CardManager cardManager;	
+
+	void Start () {
+		playerManager = GameObject.Find ("PlayerManager").GetComponent<PlayerManager>();
+		cardManager = GameObject.Find ("CardManager").GetComponent<CardManager>();
+	}
 
 	void OnMouseDown() {
 		CardManager.depth -= 0.0001f;
@@ -22,10 +29,13 @@ public class CardValue : MonoBehaviour {
 		if (Mathf.Abs (cardPositionInit.x - transform.position.x) > 0.5 || Mathf.Abs (cardPositionInit.y - transform.position.y) > 0.5) {
 		} else {
 			if (!isReturned) {
-				isReturned = true;
-				this.animation.Play("animReturnCard");
-				CardManager.LaunchRules(value);
-				GameObject.Find ("PlayerManager").GetComponent<PlayerManager>().ActiveNextPlayer();
+				if (playerManager.sipsToDistributed <= 0) {
+					isReturned = true;
+					this.animation.Play("animReturnCard");
+					cardManager.LaunchRules(value);
+				}
+				else 
+					Debug.Log ("Toutes les gorgées n'ont pas encore été distribuées !");
 			}
 		}
 	}
@@ -39,7 +49,7 @@ public class CardValue : MonoBehaviour {
 
 	void ChangeSprite () {
 		Sprite spr = Resources.Load<Sprite>("Cards/" + spriteName);
-		SpriteRenderer sprRenderer= (SpriteRenderer)renderer;
+		SpriteRenderer sprRenderer = (SpriteRenderer)renderer;
 		sprRenderer.sprite = spr;
 	}
 }

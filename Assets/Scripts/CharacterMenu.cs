@@ -46,6 +46,7 @@ public class CharacterMenu : MonoBehaviour {
 	void Start()
 	
 	{
+		playerManager = GameObject.Find ("PlayerManager").GetComponent<PlayerManager>();
 		Time.timeScale = 1;
 		PauseGame();
 	}
@@ -109,11 +110,13 @@ public class CharacterMenu : MonoBehaviour {
 		sliderValue = GUILayout.HorizontalSlider(sliderValue, 0.0F, 10);
 
 		if (GUILayout.Button ("Ok")) {
-			//GameObject pm; 
-			playerManager = GameObject.Find ("PlayerManager").GetComponent<PlayerManager>();
-			playerManager.CreateTokens ((int)sliderValue);
+
+			if (sliderValue < 2)
+				playerManager.tokenMode = false;
+			else
+				playerManager.CreateTokens ((int)sliderValue);
+
 			UnPauseGame();
-			// On récupère le script PlayerManager et on instancie les jetons
 		}
 		GUILayout.EndArea();
 
@@ -196,9 +199,7 @@ public class CharacterMenu : MonoBehaviour {
 	/// </summary>
 	void Qualities() 
 	{
-		switch (QualitySettings.currentLevel) 
-		
-		{
+		switch (QualitySettings.currentLevel) {
 		case QualityLevel.Fastest:
 			GUILayout.Label("Fastest");
 			break;

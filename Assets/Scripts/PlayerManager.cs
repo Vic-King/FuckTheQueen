@@ -7,12 +7,18 @@ public class PlayerManager : MonoBehaviour {
 
 	private int nbPlayers;
 	private int currentPlayer = 0;
+	public bool tokenMode = true;
+	public int sipsToDistributed = 0;
+
 	private Color[] colors;
 	private Token tokenScript;
 	private GameObject[] listTokens;
+	private CardManager cardManager;
 
 	// Use this for initialization
 	void Start () {
+		cardManager = GameObject.Find ("CardManager").GetComponent<CardManager>();
+
 		colors = new Color[] {
 			new Color(0.0f, 0.0f, 0.0f), 
 			new Color(1.0f, 0.0f, 0.0f), 
@@ -38,25 +44,45 @@ public class PlayerManager : MonoBehaviour {
 			tokenClone.renderer.material.color = colors[i];
 			tokenScript = tokenClone.GetComponent<Token>();
 			tokenScript.SetID (i);
+			if (i == 0)
+				tokenScript.Active ();
 		}
+	}
 
+	public void TakeSip (int n) {
+		listTokens = GameObject.FindGameObjectsWithTag ("Token");
+		
+		foreach (GameObject t in listTokens) {
+			tokenScript = t.GetComponent<Token>();
+
+			if (tokenScript.GetID () == n && tokenScript.GetID () == currentPlayer) {
+				if (cardManager.currentCard < 7)
+					tokenScript.honor++;
+				tokenScript.sipsDrunk++;
+				break;
+			}
+			else if (tokenScript.GetID () == n)
+				tokenScript.sipsDrunk++;
+			else if (tokenScript.GetID () == currentPlayer)
+				tokenScript.sipsGiven++;
+		}
+		sipsToDistributed--;
+		TestChangePlayer ();
+	}
+
+	public void TestChangePlayer() {
+		if (sipsToDistributed <= 0) {
+			ActiveNextPlayer();
+		}
+	}
+
+	private void ActiveNextPlayer () {
 		listTokens = GameObject.FindGameObjectsWithTag ("Token");
 
 		foreach (GameObject t in listTokens) {
 			tokenScript = t.GetComponent<Token>();
-			
-			if (tokenScript.GetID () == 0) {
-				tokenScript.Active ();
-			}
-		}
-	}
 
-	public void ActiveNextPlayer () {
-
-		foreach (GameObject t in listTokens) {
-			tokenScript = t.GetComponent<Token>();
-
-			if (tokenScript.GetID () == (currentPlayer + 1) % nbPlayers)
+			if (t.GetComponent<Token>().GetID () == (currentPlayer + 1) % nbPlayers)
 				tokenScript.Active ();
 			else if (tokenScript.GetID () == currentPlayer)
 				tokenScript.Unactive ();

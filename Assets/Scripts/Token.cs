@@ -1,40 +1,65 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class Token : MonoBehaviour {
+	
+	public float time;
+	public int sipsDrunk = 0;
+	public int sipsGiven = 0;
+	public int honor = 0;
 
+	private int ID;
 	private Vector2 centerScreen;
 	private Vector3 tokenPositionInit;
 	private bool isOpen = false;
-	private float angle;
-	public int ID;
+	private bool needOpen = false;
+	private float angle = 0.0f;
 	private string namePlayer = "Player";
-	private int sipsDrunk = 0;
-	private int sipsGiven = 0;
+	private float timer = 0.0f;
+	private float timerOK = 0.0f;
+	private PlayerManager playerManager;
+	private Vector3 distanceWithToken;
+	private Vector3 mousePosition;
 
 	// Use this for initialization
 	void Start () {
+		playerManager = GameObject.Find ("PlayerManager").GetComponent<PlayerManager>();
+
 		centerScreen = new Vector2(Screen.width / 2, Screen.height / 2);
 	}
 	
 	// Update is called once per frame
 	void Update () {
-	
+		timer += Time.fixedDeltaTime;
+		if ((timer > timerOK + time) && needOpen) {
+			isOpen = isOpen ? isOpen = false : isOpen = true;
+			needOpen = false;
+		}
 	}
 
 	void OnMouseDown() {
 		tokenPositionInit = transform.position;
+		mousePosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+		distanceWithToken = tokenPositionInit - mousePosition;
+		timerOK = timer;
+		needOpen = true;
 	}
 
 	void OnMouseUp () {
-		if (Mathf.Abs (tokenPositionInit.x - transform.position.x) > 0.5 || Mathf.Abs (tokenPositionInit.y - transform.position.y) > 0.5) {
-		} else {
-			isOpen = isOpen ? isOpen = false : isOpen = true;
+		needOpen = false;
+		if (Mathf.Abs (tokenPositionInit.x - transform.position.x) > 0.5 || Mathf.Abs (tokenPositionInit.y - transform.position.y) > 0.5) {}
+		else {
+			if (playerManager.sipsToDistributed > 0) {
+				playerManager.TakeSip (ID);
+			}
 		}
 	}
 
 	void OnMouseDrag () {
-		transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+		mousePosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+		if (Mathf.Abs (tokenPositionInit.x - transform.position.x) > 0.5 || Mathf.Abs (tokenPositionInit.y - transform.position.y) > 0.5)
+			needOpen = false;
+		transform.position = mousePosition + distanceWithToken;
 		this.transform.position = new Vector3 (transform.position.x, transform.position.y, CardManager.depth);
 
 		calculAngle ();
@@ -50,18 +75,27 @@ public class Token : MonoBehaviour {
 		float m2 = Mathf.Sqrt (v2.x * v2.x + v2.y * v2.y);
 		
 		angle = - Mathf.Sign(v1.x * v2.y - v1.y * v2.x) * Mathf.Acos (m / (m1 * m2)) * 180 / Mathf.PI;
+		if (float.IsNaN(angle))
+			angle = 0.0f;
 	}
 
 	void OnGUI () {
-			Vector3 position = Camera.main.WorldToScreenPoint (this.transform.position);
-			position = new Vector3 (position.x, Screen.height - position.y);
-			GUIUtility.RotateAroundPivot (angle, position);
+		ShowStats ();;
+	}
+
+	private void ShowStats () {
+		Vector3 position = Camera.main.WorldToScreenPoint (this.transform.position);
+		position = new Vector3 (position.x, Screen.height - position.y);
+		Debug.Log (position + " " + angle);
+		GUIUtility.RotateAroundPivot (angle, position);
+		
 		if (isOpen) {
 			GUI.BeginGroup(new Rect(position.x + 50, position.y - 50, 100, 100));
 			GUI.Box (new Rect (0.0f, 0.0f, 100, 100), "");
 			namePlayer = GUILayout.TextField(namePlayer, 13, "textfield");
 			GUILayout.Label("Sips drunk : " + sipsDrunk);
 			GUILayout.Label("Sips given : " + sipsGiven);
+			GUILayout.Label("Honor : " + honor);
 			GUI.EndGroup();
 		} else {
 			GUI.BeginGroup(new Rect(position.x + 50, position.y - 50, 100, 20));
